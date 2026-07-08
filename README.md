@@ -92,6 +92,18 @@ streamlit run app.py
 4. `chroma_db/` pesa ~21 MB (bien por debajo de los límites de GitHub) y ya está incluida en el
    repositorio, así que la app no necesita reconstruirla al desplegarse.
 
+## Flujo de ramas (Git)
+
+El repositorio usa 3 ramas con roles fijos:
+
+- **`master`** — rama base. No se toca directamente; queda como referencia del estado inicial.
+- **`dev`** — rama de desarrollo activo. Todo el trabajo nuevo se hace aquí.
+- **`prod`** — rama de producción. Solo recibe merges desde `dev` una vez que un cambio está
+  confirmado y probado.
+
+Flujo de trabajo: se desarrolla y se commitea en `dev` → cuando algo está listo y verificado, se
+mergea `dev` → `prod`. `master` no participa en este flujo, se mantiene como punto de partida fijo.
+
 ## Estructura del repositorio
 
 - `agente_nutricion.ipynb` — notebook principal (base de conocimiento, agente RAG, chat, ejemplos).
