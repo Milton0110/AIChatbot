@@ -1,0 +1,114 @@
+# Asistente Experto en Nutrición y Planes de Comidas
+
+Agente de IA generativa que responde preguntas de nutrición y genera planes de comidas diarios
+personalizados para una persona adulta, usando RAG sobre guías oficiales de nutrición, Google
+Gemini como LLM/embeddings, ChromaDB como base de conocimiento vectorial y LangGraph como
+framework de agente con memoria de conversación.
+
+## Dominio elegido
+
+**Nutrición y generación de menús diarios**, cubriendo calorías, macronutrientes y recomendaciones
+de una dieta completa y sana para adultos. El agente puede:
+
+- Calcular el Gasto Energético Total (GET) de una persona a partir de su edad, sexo, peso, altura
+  y nivel de actividad física.
+- Repartir ese GET en macronutrientes dentro de los rangos recomendados.
+- Proponer un menú diario (desayuno, comida, cena y snacks) coherente con esos objetivos.
+- Responder preguntas generales de nutrición (fibra, agua, sal, azúcar, grupos de alimentos...).
+
+Es un dominio con reglas cuantificables (calorías, macronutrientes, raciones por grupo de
+alimentos), lo que se presta bien a RAG combinado con generación estructurada, y admite
+personalización real en vez de un menú genérico.
+
+## Base de conocimiento
+
+6 documentos públicos oficiales combinando fuentes españolas/UE y anglosajonas/OMS —ninguna fuente
+única cubre calorías + macros + micros + fórmulas de cálculo, así que se combinan para dar
+robustez—, en [`data/base_conocimiento/`](data/base_conocimiento/) (detalle y enlaces en
+[`fuentes.md`](data/base_conocimiento/fuentes.md)):
+
+1. AESAN (2022) — Recomendaciones dietéticas saludables y sostenibles (España)
+2. SENC/FESNAD — Guía de la alimentación saludable (España)
+3. EFSA (2017) — Dietary Reference Values for nutrients (UE)
+4. USDA/HHS (2020-2025) — Dietary Guidelines for Americans (EEUU)
+5. OMS — Healthy diet fact sheet
+6. FAO/WHO/UNU (2001) — Human Energy Requirements (fórmulas de TMB/GET)
+
+## Instalación y ejecución
+
+1. Crea un entorno virtual e instala las dependencias:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Copia `.env.example` a `.env` y añade tu API key de Gemini
+   (consíguela en [Google AI Studio](https://aistudio.google.com/apikey)):
+
+   ```
+   GOOGLE_API_KEY=tu_api_key_de_gemini_aqui
+   ```
+
+3. Abre `agente_nutricion.ipynb` con Jupyter (o súbelo a Google Colab) y ejecuta las celdas en
+   orden. La primera ejecución crea e indexa la base vectorial en `chroma_db/`
+   (puede tardar unos minutos); las siguientes ejecuciones reutilizan esa base ya persistida.
+
+**Importante:** nunca subas tu API key al repositorio. `.env` no debe versionarse (ya está en
+`.gitignore`).
+
+## Justificación del system prompt
+
+El prompt completo y su justificación punto por punto están documentados en la sección 3 del
+notebook (`agente_nutricion.ipynb`). En resumen: fija el rol de experto en nutrición apoyado en
+las fuentes indexadas, exige personalización real (pide datos del usuario y aplica las fórmulas de
+TMB/GET), estructura los menús de forma accionable, marca límites claros (no sustituye a un
+profesional sanitario), responde en el idioma del usuario (español o inglés) y reutiliza el
+historial de conversación para no repetir preguntas ya respondidas.
+
+## Bonus: interfaz web en Streamlit
+
+`app.py` ofrece la misma experiencia (RAG + Gemini + memoria) en un chat web, reutilizando la base
+vectorial ya persistida en `chroma_db/` (no la vuelve a indexar). Probado localmente sin errores,
+incluyendo la memoria de conversación entre turnos.
+
+**Ejecución local** (con `.env` ya configurado):
+
+```bash
+streamlit run app.py
+```
+
+**Despliegue público en Streamlit Cloud** (pasos pendientes, requieren cuenta propia de GitHub y
+de Streamlit Cloud):
+
+1. Subir este repositorio a GitHub:
+   ```bash
+   git remote add origin https://github.com/tu-usuario/tu-repo.git
+   git push -u origin master
+   ```
+2. Crear la app en [share.streamlit.io](https://share.streamlit.io) apuntando a `app.py`.
+3. En "Secrets" de la app, añadir `GOOGLE_API_KEY = "tu_api_key"` (la key nunca está en el
+   repositorio, así que hay que configurarla ahí explícitamente).
+4. `chroma_db/` pesa ~21 MB (bien por debajo de los límites de GitHub) y ya está incluida en el
+   repositorio, así que la app no necesita reconstruirla al desplegarse.
+
+## Estructura del repositorio
+
+- `agente_nutricion.ipynb` — notebook principal (base de conocimiento, agente RAG, chat, ejemplos).
+- `app.py` — interfaz web de Streamlit (bonus).
+- `data/base_conocimiento/` — los 6 documentos PDF fuente y su ficha descriptiva (`fuentes.md`).
+- `chroma_db/` — base vectorial ya indexada y persistida.
+- `requirements.txt`, `.env.example` — dependencias y plantilla de configuración.
+
+## Requisitos
+
+- Python 3.10+
+- Cuenta de Google AI Studio con API key de Gemini habilitada
+- Dependencias listadas en `requirements.txt`
+
+## Ejemplos de uso
+
+El notebook incluye 5 preguntas de ejemplo documentadas (sección 7) y una demostración explícita
+de que la memoria de conversación funciona (sección 5: una pregunta hace referencia directa al
+cálculo de calorías de la respuesta anterior). Las salidas de estas celdas ya quedan guardadas en
+`agente_nutricion.ipynb` (ejecutado con la base vectorial real), por lo que se pueden ver
+directamente abriendo el notebook sin necesidad de ejecutarlo primero.

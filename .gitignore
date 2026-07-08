@@ -1,0 +1,20 @@
+# Secretos
+.env
+
+# Entornos virtuales / dependencias
+.venv/
+**/__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Archivos temporales de desarrollo/depuración
+_test_run*
+_check_and_fix_kb.py
+_fast_ingest*
+_outputs_extract.txt
+
+# Editor / herramientas locales
+.vscode/
+.claude/
