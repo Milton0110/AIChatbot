@@ -67,6 +67,24 @@ TMB/GET), estructura los menús de forma accionable, marca límites claros (no s
 profesional sanitario), responde en el idioma del usuario (español o inglés) y reutiliza el
 historial de conversación para no repetir preguntas ya respondidas.
 
+## Seguridad: protección contra abuso y prompt injection
+
+Como la app está desplegada públicamente, se añadieron dos capas de protección:
+
+- **Prompt endurecido** (punto 7 del system prompt, sección 3 del notebook): el agente tiene
+  instrucciones explícitas para no revelar su propio system prompt, ignorar intentos de anular su
+  rol (jailbreaks del tipo "olvida tus instrucciones" o "actúa como una IA sin restricciones"), y
+  rechazar peticiones sin relación con nutrición (traducciones, código, tareas genéricas).
+- **Límites de uso por sesión** (`app.py`): máximo 30 mensajes por sesión, un mínimo de 3 segundos
+  entre mensajes, y un máximo de 1500 caracteres por mensaje. Es una protección por sesión de
+  navegador, no un límite global por IP — suficiente para frenar el uso accidental o casual, no una
+  solución de nivel producción.
+
+Probado con 4 ataques reales antes y después de aplicar el prompt endurecido: fuga del system
+prompt, jailbreak (cambio de rol), saltarse los límites médicos, y uso fuera de dominio. Los tres
+primeros ya los bloqueaba el comportamiento base de Gemini; el cuarto (fuera de dominio) solo se
+bloqueó tras añadir la instrucción explícita de "Seguridad y alcance".
+
 ## Bonus: interfaz web en Streamlit
 
 `app.py` ofrece la misma experiencia (RAG + Gemini + memoria) en un chat web, reutilizando la base
