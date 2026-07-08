@@ -5,6 +5,8 @@ personalizados para una persona adulta, usando RAG sobre guías oficiales de nut
 Gemini como LLM/embeddings, ChromaDB como base de conocimiento vectorial y LangGraph como
 framework de agente con memoria de conversación.
 
+**App desplegada:** **[menucreatorai.streamlit.app](https://menucreatorai.streamlit.app/)**
+
 ## Dominio elegido
 
 **Nutrición y generación de menús diarios**, cubriendo calorías, macronutrientes y recomendaciones
@@ -68,8 +70,9 @@ historial de conversación para no repetir preguntas ya respondidas.
 ## Bonus: interfaz web en Streamlit
 
 `app.py` ofrece la misma experiencia (RAG + Gemini + memoria) en un chat web, reutilizando la base
-vectorial ya persistida en `chroma_db/` (no la vuelve a indexar). Probado localmente sin errores,
-incluyendo la memoria de conversación entre turnos.
+vectorial ya persistida en `chroma_db/` (no la vuelve a indexar).
+
+**Desplegada públicamente:** **[menucreatorai.streamlit.app](https://menucreatorai.streamlit.app/)**
 
 **Ejecución local** (con `.env` ya configurado):
 
@@ -77,17 +80,15 @@ incluyendo la memoria de conversación entre turnos.
 streamlit run app.py
 ```
 
-**Despliegue público en Streamlit Cloud** (pasos pendientes, requieren cuenta propia de GitHub y
-de Streamlit Cloud):
+**Despliegue propio en Streamlit Cloud** (si se quiere replicar):
 
-1. Subir este repositorio a GitHub:
-   ```bash
-   git remote add origin https://github.com/tu-usuario/tu-repo.git
-   git push -u origin master
-   ```
+1. Subir este repositorio a GitHub.
 2. Crear la app en [share.streamlit.io](https://share.streamlit.io) apuntando a `app.py`.
-3. En "Secrets" de la app, añadir `GOOGLE_API_KEY = "tu_api_key"` (la key nunca está en el
-   repositorio, así que hay que configurarla ahí explícitamente).
+3. En "Secrets" de la app, añadir en formato TOML (con comillas):
+   ```toml
+   GOOGLE_API_KEY = "tu_api_key"
+   ```
+   (la key nunca está en el repositorio, hay que configurarla ahí explícitamente).
 4. `chroma_db/` pesa ~21 MB (bien por debajo de los límites de GitHub) y ya está incluida en el
    repositorio, así que la app no necesita reconstruirla al desplegarse.
 
