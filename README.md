@@ -5,6 +5,8 @@ personalizados para una persona adulta, usando RAG sobre guías oficiales de nut
 Gemini como LLM/embeddings, ChromaDB como base de conocimiento vectorial y LangGraph como
 framework de agente con memoria de conversación.
 
+**App desplegada:** **[nutriguia.streamlit.app](https://nutriguia.streamlit.app/)**
+
 ## Dominio elegido
 
 **Nutrición y generación de menús diarios**, cubriendo calorías, macronutrientes y recomendaciones
@@ -65,11 +67,30 @@ TMB/GET), estructura los menús de forma accionable, marca límites claros (no s
 profesional sanitario), responde en el idioma del usuario (español o inglés) y reutiliza el
 historial de conversación para no repetir preguntas ya respondidas.
 
+## Seguridad: protección contra abuso y prompt injection
+
+Como la app está desplegada públicamente, se añadieron dos capas de protección:
+
+- **Prompt endurecido** (punto 7 del system prompt, sección 3 del notebook): el agente tiene
+  instrucciones explícitas para no revelar su propio system prompt, ignorar intentos de anular su
+  rol (jailbreaks del tipo "olvida tus instrucciones" o "actúa como una IA sin restricciones"), y
+  rechazar peticiones sin relación con nutrición (traducciones, código, tareas genéricas).
+- **Límites de uso por sesión** (`app.py`): máximo 30 mensajes por sesión, un mínimo de 3 segundos
+  entre mensajes, y un máximo de 1500 caracteres por mensaje. Es una protección por sesión de
+  navegador, no un límite global por IP — suficiente para frenar el uso accidental o casual, no una
+  solución de nivel producción.
+
+Probado con 4 ataques reales antes y después de aplicar el prompt endurecido: fuga del system
+prompt, jailbreak (cambio de rol), saltarse los límites médicos, y uso fuera de dominio. Los tres
+primeros ya los bloqueaba el comportamiento base de Gemini; el cuarto (fuera de dominio) solo se
+bloqueó tras añadir la instrucción explícita de "Seguridad y alcance".
+
 ## Bonus: interfaz web en Streamlit
 
 `app.py` ofrece la misma experiencia (RAG + Gemini + memoria) en un chat web, reutilizando la base
-vectorial ya persistida en `chroma_db/` (no la vuelve a indexar). Probado localmente sin errores,
-incluyendo la memoria de conversación entre turnos.
+vectorial ya persistida en `chroma_db/` (no la vuelve a indexar).
+
+**Desplegada públicamente:** **[nutriguia.streamlit.app](https://nutriguia.streamlit.app/)**
 
 **Ejecución local** (con `.env` ya configurado):
 
@@ -77,19 +98,29 @@ incluyendo la memoria de conversación entre turnos.
 streamlit run app.py
 ```
 
-**Despliegue público en Streamlit Cloud** (pasos pendientes, requieren cuenta propia de GitHub y
-de Streamlit Cloud):
+**Despliegue propio en Streamlit Cloud** (si se quiere replicar):
 
-1. Subir este repositorio a GitHub:
-   ```bash
-   git remote add origin https://github.com/tu-usuario/tu-repo.git
-   git push -u origin master
-   ```
+1. Subir este repositorio a GitHub.
 2. Crear la app en [share.streamlit.io](https://share.streamlit.io) apuntando a `app.py`.
-3. En "Secrets" de la app, añadir `GOOGLE_API_KEY = "tu_api_key"` (la key nunca está en el
-   repositorio, así que hay que configurarla ahí explícitamente).
+3. En "Secrets" de la app, añadir en formato TOML (con comillas):
+   ```toml
+   GOOGLE_API_KEY = "tu_api_key"
+   ```
+   (la key nunca está en el repositorio, hay que configurarla ahí explícitamente).
 4. `chroma_db/` pesa ~21 MB (bien por debajo de los límites de GitHub) y ya está incluida en el
    repositorio, así que la app no necesita reconstruirla al desplegarse.
+
+## Flujo de ramas (Git)
+
+El repositorio usa 3 ramas con roles fijos:
+
+- **`master`** — rama base. No se toca directamente; queda como referencia del estado inicial.
+- **`dev`** — rama de desarrollo activo. Todo el trabajo nuevo se hace aquí.
+- **`prod`** — rama de producción. Solo recibe merges desde `dev` una vez que un cambio está
+  confirmado y probado.
+
+Flujo de trabajo: se desarrolla y se commitea en `dev` → cuando algo está listo y verificado, se
+mergea `dev` → `prod`. `master` no participa en este flujo, se mantiene como punto de partida fijo.
 
 ## Estructura del repositorio
 
