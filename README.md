@@ -5,7 +5,7 @@ personalizados para una persona adulta, usando RAG sobre guías oficiales de nut
 Gemini como LLM/embeddings, ChromaDB como base de conocimiento vectorial y LangGraph como
 framework de agente con memoria de conversación.
 
-**App desplegada:** **[menucreatorai.streamlit.app](https://menucreatorai.streamlit.app/)**
+**App desplegada:** **[nutriguia.streamlit.app](https://nutriguia.streamlit.app/)**
 
 ## Dominio elegido
 
@@ -90,7 +90,7 @@ bloqueó tras añadir la instrucción explícita de "Seguridad y alcance".
 `app.py` ofrece la misma experiencia (RAG + Gemini + memoria) en un chat web, reutilizando la base
 vectorial ya persistida en `chroma_db/` (no la vuelve a indexar).
 
-**Desplegada públicamente:** **[menucreatorai.streamlit.app](https://menucreatorai.streamlit.app/)**
+**Desplegada públicamente:** **[nutriguia.streamlit.app](https://nutriguia.streamlit.app/)**
 
 **Ejecución local** (con `.env` ya configurado):
 
