@@ -148,6 +148,8 @@ if st.session_state.num_mensajes >= MAX_MENSAJES_POR_SESION:
     )
 else:
     pregunta = st.chat_input("Pregúntame sobre nutrición o pide tu menú diario...")
+    if pregunta and not pregunta.strip():
+        pregunta = None
     if pregunta:
         ahora = time.time()
         segundos_desde_ultimo = ahora - st.session_state.ultimo_mensaje_ts
